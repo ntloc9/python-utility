@@ -1,11 +1,33 @@
+from pathlib import Path
 import subprocess
+import json
 import os
-
-def getLength(filename):
-  result = subprocess.Popen(["ffprobe", filename],
-    stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-  return [x for x in result.stdout.readlines() if "Duration" in x]
+from datetime import datetime  
+from datetime import timedelta  
 
 
-for f in os.listdir('/mnt/Code/doc code/reactjs/Part1'):
-    print("{} is {} milliseconds long".format(f, getLength(f)))
+def video_length_seconds(filename):
+    result = subprocess.run(['ffprobe', filename, '-print_format', 'json', '-show_streams', '-loglevel', 'quiet'], capture_output=True, text=True)
+    return float(json.loads(result.stdout)['streams'][0]['duration'])
+
+# all mp4 files in the current directory in seconds
+# print(str(datetime.timedelta(seconds=sum(video_length_seconds(f) for f in Path('/mnt/Docs/spring/14. Spring MVC - Form Tags and Data Binding').glob('*.mp4')))))
+
+# for f in Path('/mnt/Docs/spring/spring/14. Spring MVC - Form Tags and Data Binding').glob('*.mp4'):
+#   print('filename {} : {}'.format(f, video_length_seconds(f)))
+
+# for f in Path('/mnt/Docs/spring/14. Spring MVC - Form Tags and Data Binding').glob('*.mp4'):
+#     print('check')
+# # all files in the current directory
+# print(sum(video_length_seconds(f) for f in Path('/mnt/Code/doc code/reactjs/loc').iterdir() if f.is_file()))
+
+
+
+#loop folder and count
+    rootdir = '/mnt/Docs/spring'
+    count = timedelta(seconds=0)  
+    # print(count + timedelta(seconds=10))
+    for subdir, dirs, files in os.walk(rootdir):
+        count = count + timedelta(seconds=sum(video_length_seconds(f) for f in Path(subdir).glob('*.mp4')))
+
+    print(count)
